@@ -1,3 +1,15 @@
+# This repo
+
+Just adds a mytest external to easily try things out `src/max-sdk/source/basics/mytest`
+
+## JSON Compilation Database (compile_commands.json)
+To allow clang to understand where things are on windows at this repo root do:
+
+```nu
+git clone https://github.com/Caphyon/clang-power-tools ~/src/clang-power-tools
+powershell -File ~/src/clang-power-tools/ClangPowerTools/ClangPowerTools/Tooling/v1/clang-build.ps1  -export-jsondb
+```
+
 # Max-SDK
 
 The Traditional Max Software Development Kit contains the API (headers, source, libraries) for building external objects (plug-ins) in C or C++ for [Max](https://cycling74.com/products/max-features). It additionally includes documentation of the API, example projects, and CMake scripts for generating Xcode and Visual Studio project files.

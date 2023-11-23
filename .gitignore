@@ -20,3 +20,7 @@ latex/
 *.md5
 
 script/verinfo.rc
+
+# clang
+.cache/
+compile_commands.json
