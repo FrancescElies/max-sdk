@@ -7,7 +7,7 @@ overlay use env.nu
 # build all externals
 x build
 # JSON Compilation Database (compile_commands.json)
-x clang-commands-json
+clang-commands-json
 ```
 To allow clang to understand where things are on windows at this repo root do:
 
