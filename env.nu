@@ -12,6 +12,7 @@ export def "x build" [] {
   } else {
     error make {msg: "not implemented" }
   }
+  maxmsp
 }
 
 # updates externals from other repositories
