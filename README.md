@@ -1,8 +1,14 @@
 # This repo
 
-Just adds a mytest external to easily try things out `src/max-sdk/source/basics/mytest`
+Just adds a playground to easily try things out `max-sdk/source/my-playground/mytest`
 
-## JSON Compilation Database (compile_commands.json)
+```nushell
+overlay use env.nu
+# build all externals
+x build
+# JSON Compilation Database (compile_commands.json)
+x clang-commands-json
+```
 To allow clang to understand where things are on windows at this repo root do:
 
 ```nu
