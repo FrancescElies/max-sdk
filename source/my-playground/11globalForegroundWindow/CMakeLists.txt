@@ -14,7 +14,7 @@ add_library(
 	${PROJECT_NAME} 
 	MODULE
 	${PROJECT_SRC}
-#  	${MAX_SDK_INCLUDES}/common/commonsyms.c
+ 	${MAX_SDK_INCLUDES}/common/commonsyms.c
 )
 
 
