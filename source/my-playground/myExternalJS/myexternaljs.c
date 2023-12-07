@@ -51,7 +51,7 @@ void print(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av) {
 t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
                            t_atom *rv) {
   t_atom a[1];
-  void *patcher;
+  t_atom_long patcher;
 
   if (ac == 1) {
     post("Argument Count (ac): %d", ac);
@@ -60,15 +60,15 @@ t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
     long atom_type_0 = atom_gettype(av);
     long atom_type_1 = atom_gettype(&av[1]);
     post("Argument Type (1) %d (2) %d", atom_type_0, atom_type_1);
-    if (atom_type_1 == A_OBJ)
-      patcher = atom_getobj(&av[1]);
+    if (atom_type_1 == A_LONG)
+      patcher = atom_getlong(&av[1]);
     else
       error("expected A_OBJ but got %d", atom_type_1);
   } else
     error("missing argument for method doEvilThingsWith()");
 
   // 💥BOOM💥 this crashes!!
-  // jpatcher_get_count(patcher);
+  // jpatcher_get_count((t_object *)patcher);
 
   // store the result in the a array.
   atom_setlong(a, 1);
