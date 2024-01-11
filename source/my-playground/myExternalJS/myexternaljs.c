@@ -1,10 +1,12 @@
 #include "ext.h" // standard Max include, always required
 #include "ext_mess.h"
 #include "ext_obex.h" // required for new style Max object
+#include "ext_post.h"
 
 typedef struct _myexternaljs {
   t_object ob; // the object itself (must be first)
   double myattr;
+  t_object *patcher;
 } t_myexternaljs;
 
 void *new_routine(t_symbol *s, long argc, t_atom *argv);
@@ -41,6 +43,8 @@ void *new_routine(t_symbol *s, long argc, t_atom *argv) {
   if ((x = (t_myexternaljs *)object_alloc(myexternaljs_class))) {
     x->myattr = 74.;
   }
+  // NOTE: Needs Max 8.6 at least
+  x->patcher = gensym("#P")->s_thing;
   return (x);
 }
 
@@ -51,27 +55,30 @@ void print(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av) {
 t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
                            t_atom *rv) {
   t_atom a[1];
-  t_atom_long patcher;
+  t_symbol *js_input;
 
   if (ac == 1) {
-    post("Argument Count (ac): %d", ac);
-  } else if (ac == 2) {
-    post("Argument Count (ac): %d", ac);
-    long atom_type_0 = atom_gettype(av);
     long atom_type_1 = atom_gettype(&av[1]);
-    post("Argument Type (1) %d (2) %d", atom_type_0, atom_type_1);
-    if (atom_type_1 == A_LONG)
-      patcher = atom_getlong(&av[1]);
-    else
+    if (atom_type_1 == A_SYM) {
+      js_input = atom_getsym(&av[1]);
+      post("js_input %s", js_input->s_name);
+    } else {
       error("expected A_OBJ but got %d", atom_type_1);
-  } else
+    }
+  } else {
     error("missing argument for method doEvilThingsWith()");
+  }
 
-  // 💥BOOM💥 this crashes!!
-  // jpatcher_get_count((t_object *)patcher);
+  //
+  // object_obex_lookup(x, gensym("#P"), &patcher);
+
+  post("patcher address, using p = gensym(\"#P\")->s_thing in constructor: %lx",
+       x->patcher);
+
+  long result = jpatcher_get_count(x->patcher);
 
   // store the result in the a array.
-  atom_setlong(a, 1);
+  atom_setlong(a, result);
 
   // return the result to js
   atom_setobj(rv, object_new(gensym("nobox"), gensym("atomarray"), 1, a));

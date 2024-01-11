@@ -3,14 +3,14 @@
 		"fileversion" : 1,
 		"appversion" : 		{
 			"major" : 8,
-			"minor" : 3,
-			"revision" : 3,
+			"minor" : 6,
+			"revision" : 0,
 			"architecture" : "x64",
 			"modernui" : 1
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 646.0, 202.0, 640.0, 480.0 ],
+		"rect" : [ 992.0, 497.0, 640.0, 480.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -71,7 +71,7 @@
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 54.0, 229.0, 133.0, 22.0 ],
 					"saved_object_attributes" : 					{
-						"filename" : "./test_myexternaljs.js",
+						"filename" : "test_myexternaljs.js",
 						"parameter_enable" : 0
 					}
 ,

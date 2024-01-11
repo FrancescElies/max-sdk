@@ -1,9 +1,5 @@
-var myexternal = MyExternalJS();
-// trigger the print method of myexternaljs
+m = MyExternalJS();
+
 function bang() {
-    post("START\n");
-    post(this.patcher);
-    myexternal.doEvilThingsWith(1);
-    myexternal.doEvilThingsWith(this.patcher);
-    post("END\n");
+    post("Number of elements in patcher " + m.doEvilThingsWith("parent"));
 }
