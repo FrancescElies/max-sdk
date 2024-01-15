@@ -19,6 +19,7 @@ add_library(
 	${PROJECT_NAME} 
 	MODULE
 	${PROJECT_SRC}
+	${MAX_SDK_INCLUDES}/common/commonsyms.c
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../max-sdk-base/script/max-posttarget.cmake)

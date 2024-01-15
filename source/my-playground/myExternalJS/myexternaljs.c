@@ -1,6 +1,8 @@
+#include "commonsyms.h"
 #include "ext.h" // standard Max include, always required
 #include "ext_mess.h"
 #include "ext_obex.h" // required for new style Max object
+#include "ext_obstring.h"
 #include "ext_post.h"
 #include "ext_proto.h"
 #include <stdio.h>
@@ -9,7 +11,6 @@ typedef struct _myexternaljs {
   t_object ob; // the object itself (must be first)
   double myattr;
   t_object *patcher;
-  t_symbol *patcher_name;
 } t_myexternaljs;
 
 void *new_routine(t_symbol *s, long argc, t_atom *argv);
@@ -23,6 +24,7 @@ static t_class *myexternaljs_class;
 void ext_main(void *r) {
   t_class *c;
 
+  common_symbols_init();
   c = class_new("myexternaljs", (method)new_routine, (method)free_routine,
                 (long)sizeof(t_myexternaljs), 0L /* leave NULL!! */, A_GIMME,
                 0);
@@ -30,6 +32,9 @@ void ext_main(void *r) {
   class_addmethod(c, (method)print, "print", 0);
   class_addmethod(c, (method)doEvilThingsWith, "doEvilThingsWith", A_GIMMEBACK,
                   0);
+
+  CLASS_METHOD_ATTR_PARSE(c, "doEvilThingsWith", "atomex", _sym_long, 0,
+                          "1"); // we accept string/obj atoms
 
   CLASS_ATTR_DOUBLE(c, "myattr", 0, t_myexternaljs, myattr);
 
@@ -48,14 +53,14 @@ void *new_routine(t_symbol *s, long argc, t_atom *argv) {
   }
   // NOTE: Needs Max 8.6 at least
   x->patcher = gensym("#P")->s_thing;
-  x->patcher_name = jpatcher_get_name(x->patcher);
   return (x);
 }
 char *get_long_string() {
+  // size_t desired_length_bytes =
+  //     32 * 1024 - 1; // 32KB (-1 for null ternimator)  32767 chars
+
   size_t desired_length_bytes =
-      32 * 1024 - 1; // 32KB (-1 for null ternimator)  32767 chars
-  //
-  // size_t desired_length_bytes = 32 * 1024; // 💥BOOM, max silently truncates
+      3 * 32 * 1024; // 💥BOOM, max silently truncates at 32KB
 
   // Allocate memory for the string
   char *long_string =
@@ -79,10 +84,10 @@ char *get_long_string() {
   return long_string;
 }
 void print(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av) {
-  post("The value of myattr is: %f", x->myattr);
+  post("The value of myattr is: %f\n", x->myattr);
 }
 
-#define AC 3
+#define AC 1
 
 t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
                            t_atom *rv) {
@@ -91,9 +96,9 @@ t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
 
   if (ac == 1) {
     long first_atom = atom_gettype(av);
-    if (first_atom == A_SYM) {
-      js_input = atom_getsym(av);
-      post("js_input %s", js_input->s_name);
+    if (first_atom == A_OBJ) {
+      js_input = atom_getobj(av);
+      post("js_input %s\n", js_input->s_name);
     } else {
       error("expected A_OBJ but got %d", first_atom);
     }
@@ -105,15 +110,23 @@ t_max_err doEvilThingsWith(t_myexternaljs *x, t_symbol *s, long ac, t_atom *av,
   char *a_long_string = get_long_string();
 
   // Test 2: get current patcher object count
+
+  t_symbol *patcher_name = jpatcher_get_name(x->patcher);
+  post("patcher name %s\n", patcher_name);
   long number_objects_in_patcher = jpatcher_get_count(x->patcher);
+  post("num objects in patcher %ld\n", number_objects_in_patcher);
+
+  t_string *another_long_str = string_new(a_long_string);
 
   // store the result in the a array.
-  atom_setsym(a, gensym(a_long_string));
-  atom_setsym(&a[1], x->patcher_name);
-  atom_setlong(&a[2], number_objects_in_patcher);
+  // atom_setsym(a, gensym(a_long_string));
+  atom_setobj(a, another_long_str);
 
   // return the result to js
   atom_setobj(rv, object_new(gensym("nobox"), gensym("atomarray"), AC, a));
+
+  // object_free(a_long_string);
+  // object_free(another_long_str);
 
   return MAX_ERR_NONE;
 }
