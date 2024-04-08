@@ -3,9 +3,7 @@
 Just adds a playground to easily try things out `max-sdk/source/my-playground/mytest`
 
 ```nushell
-overlay use env.nu
-# build all externals
-x build
+just build-all
 # JSON Compilation Database (compile_commands.json)
 clang-commands-json
 ```
