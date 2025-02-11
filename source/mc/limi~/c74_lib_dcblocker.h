@@ -7,35 +7,38 @@
 
 #include "c74_min_api.h"
 
+namespace c74 {
+namespace min {
+namespace lib {
 
-namespace c74 { namespace min { namespace lib {
+/// one-channel dc-blocking filter
 
+class dcblocker
+{
+  public:
+    /// Clear the filter's history
 
-	/// one-channel dc-blocking filter
+    void clear()
+    {
+        x_1 = y_1 = 0.0;
+    }
 
-	class dcblocker {
-	public:
-		/// Clear the filter's history
+    /// Calculate one sample.
+    ///	@return		Calculated sample
 
-		void clear() {
-			x_1 = y_1 = 0.0;
-		}
+    sample operator()(sample x)
+    {
+        auto y = x - x_1 + y_1 * 0.9997;
+        y_1 = y;
+        x_1 = x;
+        return y;
+    }
 
+  private:
+    sample x_1{}; ///< feedforward history
+    sample y_1{}; ///< feedback history
+};
 
-		/// Calculate one sample.
-		///	@return		Calculated sample
-
-		sample operator()(sample x) {
-			auto y = x - x_1 + y_1 * 0.9997;
-			y_1    = y;
-			x_1    = x;
-			return y;
-		}
-
-	private:
-		sample x_1{};    ///< feedforward history
-		sample y_1{};    ///< feedback history
-	};
-
-
-}}}    // namespace c74::min::lib
+} // namespace lib
+} // namespace min
+} // namespace c74
