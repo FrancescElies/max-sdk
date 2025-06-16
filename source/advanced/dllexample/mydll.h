@@ -1,15 +1,14 @@
 /**
-	@file
-	mydll - a DLL instance shared by several external objects
+        @file
+        mydll - a DLL instance shared by several external objects
 
-	@ingroup	examples
+        @ingroup	examples
 
-	Copyright 2013 - Cycling '74
-	Timothy Place, tim@cycling74.com
+        Copyright 2013 - Cycling '74
+        Timothy Place, tim@cycling74.com
 */
 
 #include "ext.h"
-
 
 // a macro to mark exported symbols in the code without requiring an external file to define them
 #ifdef WIN_VERSION
@@ -20,10 +19,9 @@
 #define T_EXPORT __attribute__((visibility("default")))
 #endif
 
-
 // prototypes
 BEGIN_USING_C_LINKAGE
 void T_EXPORT mydll_init(void);
 void T_EXPORT mydll_inc(void);
-int  T_EXPORT mydll_getcount(void);
+int T_EXPORT mydll_getcount(void);
 END_USING_C_LINKAGE

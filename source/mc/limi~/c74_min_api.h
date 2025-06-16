@@ -5,10 +5,10 @@
 
 #pragma once
 
-//#include "c74_max.h"
-//#include "c74_ui.h"
-//#include "c74_ui_graphics.h"
-//#include "c74_msp.h"
+// #include "c74_max.h"
+// #include "c74_ui.h"
+// #include "c74_ui_graphics.h"
+// #include "c74_msp.h"
 
 #include <array>
 #include <atomic>
@@ -27,241 +27,250 @@
 #include <unordered_map>
 #include <utility>
 
-//#include "readerwriterqueue/readerwriterqueue.h"
+// #include "readerwriterqueue/readerwriterqueue.h"
 
-//#include "murmur/Murmur3.h"    // used for constexpr hash function
+// #include "murmur/Murmur3.h"    // used for constexpr hash function
 
-namespace c74 { namespace min {
+namespace c74 {
+namespace min {
 
-	// types
+// types
 
-	using uchar = unsigned char;
+using uchar = unsigned char;
 
-	using std::string;
-	using std::vector;
+using std::string;
+using std::vector;
 
-	template<class T>
-	using unique_ptr = std::unique_ptr<T>;
+template <class T>
+using unique_ptr = std::unique_ptr<T>;
 
-	using number = double;
-	using sample = double;
-	struct anything {};
+using number = double;
+using sample = double;
+struct anything
+{};
 
-	using numbers = std::vector<number>;
+using numbers = std::vector<number>;
 
-	template<size_t count>
-	using samples = std::array<sample, count>;
+template <size_t count>
+using samples = std::array<sample, count>;
 
-	using sample_vector = std::vector<sample>;
+using sample_vector = std::vector<sample>;
 
+// The title and description types are just strings.
+// However, we have to define them unambiguously for the argument parsing in the attribute.
 
-	// The title and description types are just strings.
-	// However, we have to define them unambiguously for the argument parsing in the attribute.
+class title : public std::string
+{
+    using std::string::string; // inherit constructors
+};
 
-	class title : public std::string {
-		using std::string::string;    // inherit constructors
-	};
+class description : public std::string
+{
+    using std::string::string; // inherit constructors
+};
 
-	class description : public std::string {
-		using std::string::string;    // inherit constructors
-	};
+/// This enum thus represents a placeholder type that is used in places where dummy template parameters are present.
 
-
-	/// This enum thus represents a placeholder type that is used in places where dummy template parameters are present.
-
-	enum class placeholder {
-		none    ///< No flags, functions, or other alterations to the class.
-	};
+enum class placeholder
+{
+    none ///< No flags, functions, or other alterations to the class.
+};
 
 /*
-	enum class message_type : long {
-		nothing,
-		long_arg,
-		float_arg,
-		symbol_arg,
-		object_argument,
-		long_optional,
-		float_optional,
-		symbol_optional,
-		gimme,
-		cant,
-		semicolon,
-		comma,
-		dollar,
-		dollar_symbol,
-		gimmeback,
-		defer     = max::A_DEFER,
-		usurp     = max::A_USURP,
-		defer_low = max::A_DEFER_LOW,
-		usurp_low = max::A_USURP_LOW
-	};
+        enum class message_type : long {
+                nothing,
+                long_arg,
+                float_arg,
+                symbol_arg,
+                object_argument,
+                long_optional,
+                float_optional,
+                symbol_optional,
+                gimme,
+                cant,
+                semicolon,
+                comma,
+                dollar,
+                dollar_symbol,
+                gimmeback,
+                defer     = max::A_DEFER,
+                usurp     = max::A_USURP,
+                defer_low = max::A_DEFER_LOW,
+                usurp_low = max::A_USURP_LOW
+        };
 */
 
-	// Very selective group from the STL used only for making common
-	// template SFINAE code more readable
+// Very selective group from the STL used only for making common
+// template SFINAE code more readable
 
-	using std::enable_if;
-	using std::is_base_of;
-	using std::is_enum;
-	using std::is_same;
+using std::enable_if;
+using std::is_base_of;
+using std::is_enum;
+using std::is_same;
 
+// Helper code for type/template selection
 
-	// Helper code for type/template selection
-
-	class symbol;
-	class time_value;
-	class matrix_operator_base;
-	class gl_operator_base;
-	class sample_operator_base;
-	class vector_operator_base;
-	class ui_operator_base;
+class symbol;
+class time_value;
+class matrix_operator_base;
+class gl_operator_base;
+class sample_operator_base;
+class vector_operator_base;
+class ui_operator_base;
 /*
-	namespace ui {
-		class color {
-		public:
-			enum colors { black, white, gray };
+        namespace ui {
+                class color {
+                public:
+                        enum colors { black, white, gray };
 
-			color()
-			: color{colors::black} {}
+                        color()
+                        : color{colors::black} {}
 
-			color(max::t_jrgba a_color)
-			: m_color{a_color} {}
+                        color(max::t_jrgba a_color)
+                        : m_color{a_color} {}
 
-			color(double red, double green, double blue, double alpha)
-			: m_color{red, green, blue, alpha} {}
+                        color(double red, double green, double blue, double alpha)
+                        : m_color{red, green, blue, alpha} {}
 
-			color(colors a_color) {
-				switch (a_color) {
-					case black:
-						m_color = {0.0, 0.0, 0.0, 1.0};
-						break;
-					case white:
-						m_color = {1.0, 1.0, 1.0, 1.0};
-						break;
-					case gray:
-						m_color = {0.7, 0.7, 0.7, 1.0};
-						break;
-				}
-			}
-
-
-			operator c74::max::t_jrgba*() {
-				return &m_color;
-			}
+                        color(colors a_color) {
+                                switch (a_color) {
+                                        case black:
+                                                m_color = {0.0, 0.0, 0.0, 1.0};
+                                                break;
+                                        case white:
+                                                m_color = {1.0, 1.0, 1.0, 1.0};
+                                                break;
+                                        case gray:
+                                                m_color = {0.7, 0.7, 0.7, 1.0};
+                                                break;
+                                }
+                        }
 
 
-			double red() const {
-				return m_color.red;
-			}
+                        operator c74::max::t_jrgba*() {
+                                return &m_color;
+                        }
 
-			double green() const {
-				return m_color.green;
-			}
 
-			double blue() const {
-				return m_color.blue;
-			}
+                        double red() const {
+                                return m_color.red;
+                        }
 
-			double alpha() const {
-				return m_color.alpha;
-			}
+                        double green() const {
+                                return m_color.green;
+                        }
 
-		private:
-			max::t_jrgba m_color;
-		};
-	}    // namespace ui
+                        double blue() const {
+                                return m_color.blue;
+                        }
+
+                        double alpha() const {
+                                return m_color.alpha;
+                        }
+
+                private:
+                        max::t_jrgba m_color;
+                };
+        }    // namespace ui
 */
-	template<class T>
-	using is_class = std::is_class<T>;
+template <class T>
+using is_class = std::is_class<T>;
 
-	template<class T>
-	using is_symbol = is_same<T, symbol>;
+template <class T>
+using is_symbol = is_same<T, symbol>;
 
-	template<class T>
-	using is_time_value = is_same<T, time_value>;
+template <class T>
+using is_time_value = is_same<T, time_value>;
 
-	//template<class T>
+// template<class T>
 //	using is_color = is_same<T, ui::color>;
 
-	template<class min_class_type>
-	using enable_if_matrix_operator = typename enable_if<is_base_of<matrix_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_matrix_operator = typename enable_if<is_base_of<matrix_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_not_matrix_operator = typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_not_matrix_operator = typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_gl_operator = typename enable_if<is_base_of<gl_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_gl_operator = typename enable_if<is_base_of<gl_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_sample_operator = typename enable_if<is_base_of<sample_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_sample_operator = typename enable_if<is_base_of<sample_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_vector_operator = typename enable_if<is_base_of<vector_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_vector_operator = typename enable_if<is_base_of<vector_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_audio_class = typename enable_if<
-		is_base_of<vector_operator_base, min_class_type>::value || is_base_of<sample_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using enable_if_audio_class = typename enable_if<
+    is_base_of<vector_operator_base, min_class_type>::value || is_base_of<sample_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_jitter_class =
-		typename enable_if<is_base_of<matrix_operator_base, min_class_type>::value || is_base_of<gl_operator_base, min_class_type>::value,
-			int>::type;
+template <class min_class_type>
+using enable_if_jitter_class =
+    typename enable_if<is_base_of<matrix_operator_base, min_class_type>::value || is_base_of<gl_operator_base, min_class_type>::value,
+                       int>::type;
 
-	template<class min_class_type>
-	using enable_if_not_jitter_class =
-		typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value && !is_base_of<gl_operator_base, min_class_type>::value,
-			int>::type;
+template <class min_class_type>
+using enable_if_not_jitter_class =
+    typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value && !is_base_of<gl_operator_base, min_class_type>::value,
+                       int>::type;
 
+template <class min_class_type>
+using type_enable_if_audio_class = typename enable_if<is_base_of<vector_operator_base, min_class_type>::value
+                                                      || is_base_of<sample_operator_base, min_class_type>::value>::type;
 
-	template<class min_class_type>
-	using type_enable_if_audio_class = typename enable_if<is_base_of<vector_operator_base, min_class_type>::value
-		|| is_base_of<sample_operator_base, min_class_type>::value>::type;
+template <class min_class_type>
+using type_enable_if_not_audio_class = typename enable_if<!is_base_of<vector_operator_base, min_class_type>::value
+                                                          && !is_base_of<sample_operator_base, min_class_type>::value>::type;
 
-	template<class min_class_type>
-	using type_enable_if_not_audio_class = typename enable_if<!is_base_of<vector_operator_base, min_class_type>::value
-		&& !is_base_of<sample_operator_base, min_class_type>::value>::type;
+template <class min_class_type>
+using type_enable_if_not_jitter_class = typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value
+                                                           && !is_base_of<gl_operator_base, min_class_type>::value>::type;
 
-	template<class min_class_type>
-	using type_enable_if_not_jitter_class = typename enable_if<!is_base_of<matrix_operator_base, min_class_type>::value
-		&& !is_base_of<gl_operator_base, min_class_type>::value>::type;
+template <class min_class_type>
+using enable_if_ui_operator = typename enable_if<is_base_of<ui_operator_base, min_class_type>::value, int>::type;
 
+template <class min_class_type>
+using enable_if_not_ui_operator = typename enable_if<!is_base_of<ui_operator_base, min_class_type>::value, int>::type;
 
-	template<class min_class_type>
-	using enable_if_ui_operator = typename enable_if<is_base_of<ui_operator_base, min_class_type>::value, int>::type;
+template <class min_class_type>
+using type_enable_if_not_ui_class = typename enable_if<!is_base_of<ui_operator_base, min_class_type>::value>::type;
 
-	template<class min_class_type>
-	using enable_if_not_ui_operator = typename enable_if<!is_base_of<ui_operator_base, min_class_type>::value, int>::type;
+enum class threadsafe
+{
+    undefined,
+    no,
+    yes
+};
+enum class allow_repetitions
+{
+    undefined,
+    no,
+    yes
+};
 
-	template<class min_class_type>
-	using type_enable_if_not_ui_class = typename enable_if<!is_base_of<ui_operator_base, min_class_type>::value>::type;
-
-
-	enum class threadsafe { undefined, no, yes };
-	enum class allow_repetitions { undefined, no, yes };
-
-	using mutex = std::mutex;
-	using guard = std::lock_guard<std::mutex>;
-	using lock  = std::unique_lock<std::mutex>;
-
+using mutex = std::mutex;
+using guard = std::lock_guard<std::mutex>;
+using lock = std::unique_lock<std::mutex>;
 
 //	template<typename T>
 //	using fifo = moodycamel::ReaderWriterQueue<T>;
 
+/// Compare two floating-point numbers to determine if they are roughly equal
+/// @param lhs The left hand side of the comparison
+/// @param rhs The right hand side of the comparison
+/// @return true if they are roughly the same, otherwise false
 
-	/// Compare two floating-point numbers to determine if they are roughly equal
-	/// @param lhs The left hand side of the comparison
-	/// @param rhs The right hand side of the comparison
-	/// @return true if they are roughly the same, otherwise false
+template <typename T>
+bool equivalent(T lhs, T rhs, double epsilon = std::numeric_limits<float>::epsilon() * 100.0, double margin = 0.0, double scale = 1.0)
+{
+    if (std::fabs(lhs - rhs) < epsilon * (scale + (std::max)(std::fabs(lhs), std::fabs(rhs)))) {
+        return true;
+    }
+    return std::fabs(lhs - rhs) < margin;
+}
 
-	template<typename T>
-	bool equivalent(T lhs, T rhs, double epsilon = std::numeric_limits<float>::epsilon() * 100.0, double margin = 0.0, double scale = 1.0) {
-		if (std::fabs( lhs - rhs ) < epsilon * (scale + (std::max)( std::fabs(lhs), std::fabs(rhs) ) ))
-			return true;
-		return std::fabs(lhs - rhs) < margin;
-	}
-
-}}    // namespace c74::min
-
+} // namespace min
+} // namespace c74
 
 /// A standard interface for flagging serious runtime snafus.
 /// At the moment this is hardwired to throw an exception but offers us the ability to
@@ -270,7 +279,7 @@ namespace c74 { namespace min {
 /// Because this throws an exception you should **not** call this function in an audio perform routine.
 /*
 inline void error(const std::string& description) {
-	throw std::runtime_error(description);
+        throw std::runtime_error(description);
 }
 
 
@@ -278,7 +287,7 @@ inline void error(const std::string& description) {
 /// When possible you should specify a description string and pass as an argument instead of calling this variant.
 
 inline void error() {
-	throw std::runtime_error("unknown");
+        throw std::runtime_error("unknown");
 }
 
 
@@ -286,8 +295,8 @@ inline void error() {
 ///					In other words "true" will cause an exception to throw while "false" will not.
 
 inline void error(bool check, const std::string& description) {
-	if (check)
-		throw std::runtime_error(description);
+        if (check)
+                throw std::runtime_error(description);
 }
 */
 /// Reverse the byte-ordering of an int.
@@ -295,20 +304,20 @@ inline void error(bool check, const std::string& description) {
 /// @param x	The int to have its byte-ordering reversed.
 /// @return		The byte-swapped output of this function.
 
-inline uint16_t byteorder_swap(uint16_t x) {
-	return ((int16_t)(((((uint16_t)(x)) >> 8) & 0x00ff) + ((((uint16_t)(x)) << 8) & 0xff00)));
+inline uint16_t byteorder_swap(uint16_t x)
+{
+    return ((int16_t)(((((uint16_t)(x)) >> 8) & 0x00ff) + ((((uint16_t)(x)) << 8) & 0xff00)));
 }
 
-
-//#include "c74_min_symbol.h"
-//#include "c74_min_atom.h"
-//#include "c74_min_dictionary.h"
-//#include "c74_min_limit.h"    // Library of miscellaneous helper functions (e.g. range clipping)
+// #include "c74_min_symbol.h"
+// #include "c74_min_atom.h"
+// #include "c74_min_dictionary.h"
+// #include "c74_min_limit.h"    // Library of miscellaneous helper functions (e.g. range clipping)
 /*
 namespace c74 { namespace min {
-	static max::t_class*  this_class      = nullptr;
-	static bool           this_class_init = false;
-	static max::t_symbol* this_class_name = nullptr;
+        static max::t_class*  this_class      = nullptr;
+        static bool           this_class_init = false;
+        static max::t_symbol* this_class_name = nullptr;
 }}    // namespace c74::min
 
 
@@ -364,9 +373,9 @@ void wrap_as_max_external(const char* cppname, const char* maxname, void* resour
 /// @see					MIN_EXTERNAL_CUSTOM
 
 #define MIN_EXTERNAL(cpp_classname)                                                                                                        \
-	void ext_main(void* r) {                                                                                                               \
-		c74::min::wrap_as_max_external<cpp_classname>(#cpp_classname, __FILE__, r);                                                        \
-	}
+        void ext_main(void* r) {                                                                                                               \
+                c74::min::wrap_as_max_external<cpp_classname>(#cpp_classname, __FILE__, r);                                                        \
+        }
 
 
 /// Wrap a class that extends min::object for use in the Max environment.
@@ -378,7 +387,7 @@ void wrap_as_max_external(const char* cppname, const char* maxname, void* resour
 /// @see					MIN_EXTERNAL
 
 #define MIN_EXTERNAL_CUSTOM(cpp_classname, max_name)                                                                                       \
-	void ext_main(void* r) {                                                                                                               \
-		c74::min::wrap_as_max_external<cpp_classname>(#max_name, __FILE__, r);                                                             \
-	}
+        void ext_main(void* r) {                                                                                                               \
+                c74::min::wrap_as_max_external<cpp_classname>(#max_name, __FILE__, r);                                                             \
+        }
 */

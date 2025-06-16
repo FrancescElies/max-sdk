@@ -1,6 +1,6 @@
 /*
-	Copyright 2002-2005 - Cycling '74
-	R. Luke DuBois luke@cycling74.com
+        Copyright 2002-2005 - Cycling '74
+        R. Luke DuBois luke@cycling74.com
 */
 
 /*	jit.turtle emulates simple LOGO-style graphics.  it interprets single char values in its inlet as ASCII letters
@@ -65,245 +65,248 @@
 
 typedef struct _max_jit_turtle
 {
-	t_object		ob;
-	void			*obex; // we don't really need this, but whatever
-	void 			*turtleout;
-	// turtle attributes -- feel free to add your own here.
-	long			command;
-	long			clearmode;
-	long			origin[2];
-	long			origincount;
-	long			angle;
-	long			scale;
-	double			thisangle[MAXSTACK];
-	long			curstack;
-	long			stacknew;
-	long			pensize[MAXSTACK];
-	long			stack_x[MAXSTACK], stack_y[MAXSTACK];
+    t_object ob;
+    void* obex; // we don't really need this, but whatever
+    void* turtleout;
+    // turtle attributes -- feel free to add your own here.
+    long command;
+    long clearmode;
+    long origin[2];
+    long origincount;
+    long angle;
+    long scale;
+    double thisangle[MAXSTACK];
+    long curstack;
+    long stacknew;
+    long pensize[MAXSTACK];
+    long stack_x[MAXSTACK], stack_y[MAXSTACK];
 
 } t_max_jit_turtle;
 
-void *max_jit_turtle_new(t_symbol *s, long argc, t_atom *argv);
-void max_jit_turtle_free(t_max_jit_turtle *x);
-void max_jit_turtle_assist(t_max_jit_turtle *x, void *b, long m, long a, char *s);
-void max_jit_turtle_bang(t_max_jit_turtle *x); // does nothing
-void max_jit_turtle_int(t_max_jit_turtle *x, long n); // this is where the QD stuff is interpreted
-void max_jit_turtle_reset(t_max_jit_turtle *x); // resets the turtle's state
+void* max_jit_turtle_new(t_symbol* s, long argc, t_atom* argv);
+void max_jit_turtle_free(t_max_jit_turtle* x);
+void max_jit_turtle_assist(t_max_jit_turtle* x, void* b, long m, long a, char* s);
+void max_jit_turtle_bang(t_max_jit_turtle* x); // does nothing
+void max_jit_turtle_int(t_max_jit_turtle* x, long n); // this is where the QD stuff is interpreted
+void max_jit_turtle_reset(t_max_jit_turtle* x); // resets the turtle's state
 
-t_messlist *max_jit_turtle_class;
+t_messlist* max_jit_turtle_class;
 
-C74_EXPORT void ext_main(void *r)
+C74_EXPORT void ext_main(void* r)
 {
-	long attrflags;
-	void *p,*attr;
+    long attrflags;
+    void *p, *attr;
 
-	setup(&max_jit_turtle_class, (method)max_jit_turtle_new, (method)max_jit_turtle_free, (short)sizeof(t_max_jit_turtle),
-		  0L, A_GIMME, 0);
+    setup(&max_jit_turtle_class, (method)max_jit_turtle_new, (method)max_jit_turtle_free, (short)sizeof(t_max_jit_turtle),
+          0L, A_GIMME, 0);
 
-	p = max_jit_classex_setup(calcoffset(t_max_jit_turtle,obex));
+    p = max_jit_classex_setup(calcoffset(t_max_jit_turtle, obex));
 
-	attrflags = JIT_ATTR_GET_DEFER_LOW | JIT_ATTR_SET_USURP_LOW ;
+    attrflags = JIT_ATTR_GET_DEFER_LOW | JIT_ATTR_SET_USURP_LOW;
 
-	// origin -- where to start drawing from (or reset to with a 'reset' message)
-	attr = jit_object_new(_jit_sym_jit_attr_offset_array,"origin",_jit_sym_long,2,attrflags,
-						  (method)0,(method)0,calcoffset(t_max_jit_turtle,origincount),calcoffset(t_max_jit_turtle,origin));
-	max_jit_classex_addattr(p,attr);
-	object_addattr_parse(attr,"label",_jit_sym_symbol,0,"Origin");
+    // origin -- where to start drawing from (or reset to with a 'reset' message)
+    attr = jit_object_new(_jit_sym_jit_attr_offset_array, "origin", _jit_sym_long, 2, attrflags,
+                          (method)0, (method)0, calcoffset(t_max_jit_turtle, origincount), calcoffset(t_max_jit_turtle, origin));
+    max_jit_classex_addattr(p, attr);
+    object_addattr_parse(attr, "label", _jit_sym_symbol, 0, "Origin");
 
-	// angle -- angle factor for turning the turtle
-	attr = jit_object_new(_jit_sym_jit_attr_offset,"angle",_jit_sym_long,attrflags,
-						  (method)0,(method)0,calcoffset(t_max_jit_turtle,angle));
-	max_jit_classex_addattr(p,attr);
-	object_addattr_parse(attr,"label",_jit_sym_symbol,0,"Angle");
+    // angle -- angle factor for turning the turtle
+    attr = jit_object_new(_jit_sym_jit_attr_offset, "angle", _jit_sym_long, attrflags,
+                          (method)0, (method)0, calcoffset(t_max_jit_turtle, angle));
+    max_jit_classex_addattr(p, attr);
+    object_addattr_parse(attr, "label", _jit_sym_symbol, 0, "Angle");
 
-	// scale -- stepsize for moving the turtle
-	attr = jit_object_new(_jit_sym_jit_attr_offset,"scale",_jit_sym_long,attrflags,
-						  (method)0,(method)0,calcoffset(t_max_jit_turtle,scale));
-	max_jit_classex_addattr(p,attr);
-	object_addattr_parse(attr,"label",_jit_sym_symbol,0,"Scale");
-	
-	// clearmode -- send a clear on reset or not
-	attr = jit_object_new(_jit_sym_jit_attr_offset,"clearmode",_jit_sym_long,attrflags,
-						  (method)0,(method)0,calcoffset(t_max_jit_turtle,clearmode));
-	max_jit_classex_addattr(p,attr);
-	object_addattr_parse(attr,"label",_jit_sym_symbol,0,"\"Clear Mode\"");
+    // scale -- stepsize for moving the turtle
+    attr = jit_object_new(_jit_sym_jit_attr_offset, "scale", _jit_sym_long, attrflags,
+                          (method)0, (method)0, calcoffset(t_max_jit_turtle, scale));
+    max_jit_classex_addattr(p, attr);
+    object_addattr_parse(attr, "label", _jit_sym_symbol, 0, "Scale");
 
-	addmess((method)max_jit_turtle_reset, "reset", A_GIMME,0);
+    // clearmode -- send a clear on reset or not
+    attr = jit_object_new(_jit_sym_jit_attr_offset, "clearmode", _jit_sym_long, attrflags,
+                          (method)0, (method)0, calcoffset(t_max_jit_turtle, clearmode));
+    max_jit_classex_addattr(p, attr);
+    object_addattr_parse(attr, "label", _jit_sym_symbol, 0, "\"Clear Mode\"");
 
-	max_jit_classex_standard_wrap(p,NULL,0);
-	addmess((method)max_jit_turtle_assist, "assist", A_CANT,0);
-// 	addbang((method)max_jit_turtle_bang);
-	addint((method)max_jit_turtle_int);
+    addmess((method)max_jit_turtle_reset, "reset", A_GIMME, 0);
 
-	max_jit_class_addmethods(jit_class_findbyname(gensym("jit_turtle")));
+    max_jit_classex_standard_wrap(p, NULL, 0);
+    addmess((method)max_jit_turtle_assist, "assist", A_CANT, 0);
+    // 	addbang((method)max_jit_turtle_bang);
+    addint((method)max_jit_turtle_int);
+
+    max_jit_class_addmethods(jit_class_findbyname(gensym("jit_turtle")));
 }
 
-void max_jit_turtle_bang(t_max_jit_turtle *x)
+void max_jit_turtle_bang(t_max_jit_turtle* x)
 {
-	// pontificate here...
-	jit_object_post((t_object *)x,"HEY, YOU! STOP BANGING THE TURTLE!!!");
+    // pontificate here...
+    jit_object_post((t_object*)x, "HEY, YOU! STOP BANGING THE TURTLE!!!");
 }
 
-void max_jit_turtle_int(t_max_jit_turtle *x, long n)
+void max_jit_turtle_int(t_max_jit_turtle* x, long n)
 {
-	t_atom a[16];
-	double tempangle;
-	double temp_x, temp_y;
-	long dest_x, dest_y;
-	long curstack = x->curstack;
+    t_atom a[16];
+    double tempangle;
+    double temp_x, temp_y;
+    long dest_x, dest_y;
+    long curstack = x->curstack;
 
-	x->command = n; // why do we do this?  i can't remember...
+    x->command = n; // why do we do this?  i can't remember...
 
-	// check to see if the integer received matches the ASCII code for one of these commands.
-	// if so, compute the appropriate QuickDraw response and pass it out the outlet as a Max message.
-	switch(n) {
-	case (35): // '#' - increase pen size
-		x->pensize[curstack] = x->pensize[curstack]+1;
-		jit_atom_setlong(&a[0],x->pensize[curstack]);
-		jit_atom_setlong(&a[1],x->pensize[curstack]);
-		outlet_anything(x->turtleout, gensym("pensize"), 2, a);
-		break;
-	case (33): // '!' - decrease pen size
-		if(x->pensize[curstack]>1) x->pensize[curstack] = x->pensize[curstack]-1;
-		jit_atom_setlong(&a[0],x->pensize[curstack]);
-		jit_atom_setlong(&a[1],x->pensize[curstack]);
-		outlet_anything(x->turtleout, gensym("pensize"), 2, a);
-		break;
-	case (70): // 'F' - move forward and draw
-		if(x->stacknew) {
-			x->stack_x[curstack] = x->origin[0];
-			x->stack_y[curstack] = x->origin[1];
-			x->stacknew=0;
-		}
-		temp_x = (double)x->scale*jit_math_cos(x->thisangle[curstack]);
-		temp_y = (double)x->scale*jit_math_sin(x->thisangle[curstack]);
-		dest_x = x->stack_x[curstack]+temp_x+0.5;
-		dest_y = x->stack_y[curstack]+temp_y+0.5;
-		jit_atom_setlong(&a[0],x->stack_x[curstack]);
-		jit_atom_setlong(&a[1],x->stack_y[curstack]);
-		jit_atom_setlong(&a[2],dest_x);
-		jit_atom_setlong(&a[3],dest_y);
-		outlet_anything(x->turtleout, gensym("linesegment"), 4, a);
-		x->stack_x[curstack] = dest_x;
-		x->stack_y[curstack] = dest_y;
-		break;
-	case (102): // 'f' - move forward and don't draw
-		if(x->stacknew) {
-			x->stack_x[curstack] = x->origin[0];
-			x->stack_y[curstack] = x->origin[1];
-			x->stacknew=0;
-		}
-		temp_x = (double)x->scale*jit_math_cos(x->thisangle[curstack]);
-		temp_y = (double)x->scale*jit_math_sin(x->thisangle[curstack]);
-		dest_x = x->stack_x[curstack]+temp_x+0.5;
-		dest_y = x->stack_y[curstack]+temp_y+0.5;
-		x->stack_x[curstack] = dest_x;
-		x->stack_y[curstack] = dest_y;
-		break;
-	case (91): // '[' - start a branch
-		if(x->curstack>(MAXSTACK-2)) { // you can uncomment this jit_object_post((t_object *)x,) if you prefer... it's kind of annoying, IMHO.
-			// jit_object_post((t_object *)x,"out of stack range -- not branching");
-		}
-		else {
-			// copy current coords and angle to next branch and increment the stack
-			x->stack_x[curstack+1] = x->stack_x[curstack];
-			x->stack_y[curstack+1] = x->stack_y[curstack];
-			x->thisangle[curstack+1] = x->thisangle[curstack];
-			x->curstack++;
-		}
-		break;
-	case (93): // ']' - end a branch and decrement the stack
-		if(curstack>0) x->curstack--;
-		break;
-	case (43): // '+' - turn right
-		x->thisangle[curstack]+=((x->angle/360.)*PI2);
-		break;
-	case (45): // '-' - turn left
-		x->thisangle[curstack]-=((x->angle/360.)*PI2);
-		break;
-	case (124): // '|' - turn around
-		x->thisangle[curstack]+=(0.5*PI2);
-		break;
-	default: // no match, don't do anything
-		break;
-	}
+    // check to see if the integer received matches the ASCII code for one of these commands.
+    // if so, compute the appropriate QuickDraw response and pass it out the outlet as a Max message.
+    switch (n) {
+        case (35): // '#' - increase pen size
+            x->pensize[curstack] = x->pensize[curstack] + 1;
+            jit_atom_setlong(&a[0], x->pensize[curstack]);
+            jit_atom_setlong(&a[1], x->pensize[curstack]);
+            outlet_anything(x->turtleout, gensym("pensize"), 2, a);
+            break;
+        case (33): // '!' - decrease pen size
+            if (x->pensize[curstack] > 1) {
+                x->pensize[curstack] = x->pensize[curstack] - 1;
+            }
+            jit_atom_setlong(&a[0], x->pensize[curstack]);
+            jit_atom_setlong(&a[1], x->pensize[curstack]);
+            outlet_anything(x->turtleout, gensym("pensize"), 2, a);
+            break;
+        case (70): // 'F' - move forward and draw
+            if (x->stacknew) {
+                x->stack_x[curstack] = x->origin[0];
+                x->stack_y[curstack] = x->origin[1];
+                x->stacknew = 0;
+            }
+            temp_x = (double)x->scale * jit_math_cos(x->thisangle[curstack]);
+            temp_y = (double)x->scale * jit_math_sin(x->thisangle[curstack]);
+            dest_x = x->stack_x[curstack] + temp_x + 0.5;
+            dest_y = x->stack_y[curstack] + temp_y + 0.5;
+            jit_atom_setlong(&a[0], x->stack_x[curstack]);
+            jit_atom_setlong(&a[1], x->stack_y[curstack]);
+            jit_atom_setlong(&a[2], dest_x);
+            jit_atom_setlong(&a[3], dest_y);
+            outlet_anything(x->turtleout, gensym("linesegment"), 4, a);
+            x->stack_x[curstack] = dest_x;
+            x->stack_y[curstack] = dest_y;
+            break;
+        case (102): // 'f' - move forward and don't draw
+            if (x->stacknew) {
+                x->stack_x[curstack] = x->origin[0];
+                x->stack_y[curstack] = x->origin[1];
+                x->stacknew = 0;
+            }
+            temp_x = (double)x->scale * jit_math_cos(x->thisangle[curstack]);
+            temp_y = (double)x->scale * jit_math_sin(x->thisangle[curstack]);
+            dest_x = x->stack_x[curstack] + temp_x + 0.5;
+            dest_y = x->stack_y[curstack] + temp_y + 0.5;
+            x->stack_x[curstack] = dest_x;
+            x->stack_y[curstack] = dest_y;
+            break;
+        case (91): // '[' - start a branch
+            if (x->curstack > (MAXSTACK - 2)) { // you can uncomment this jit_object_post((t_object *)x,) if you prefer... it's kind of annoying, IMHO.
+                // jit_object_post((t_object *)x,"out of stack range -- not branching");
+            }
+            else {
+                // copy current coords and angle to next branch and increment the stack
+                x->stack_x[curstack + 1] = x->stack_x[curstack];
+                x->stack_y[curstack + 1] = x->stack_y[curstack];
+                x->thisangle[curstack + 1] = x->thisangle[curstack];
+                x->curstack++;
+            }
+            break;
+        case (93): // ']' - end a branch and decrement the stack
+            if (curstack > 0) {
+                x->curstack--;
+            }
+            break;
+        case (43): // '+' - turn right
+            x->thisangle[curstack] += ((x->angle / 360.) * PI2);
+            break;
+        case (45): // '-' - turn left
+            x->thisangle[curstack] -= ((x->angle / 360.) * PI2);
+            break;
+        case (124): // '|' - turn around
+            x->thisangle[curstack] += (0.5 * PI2);
+            break;
+        default: // no match, don't do anything
+            break;
+    }
 }
 
-void max_jit_turtle_reset(t_max_jit_turtle *x)
+void max_jit_turtle_reset(t_max_jit_turtle* x)
 {
-	t_atom a[16];
-	short i;
+    t_atom a[16];
+    short i;
 
-	x->curstack = 0;
-	x->stacknew = 1;
+    x->curstack = 0;
+    x->stacknew = 1;
 
-	for(i=0; i<MAXSTACK; i++) {
-		x->thisangle[i] = -PI2/4.; // start facing north (upwards, towards your menubar).
-		x->stack_x[i] = x->origin[0];
-		x->stack_y[i] = x->origin[1];
-		x->pensize[i]=1;
-	}
+    for (i = 0; i < MAXSTACK; i++) {
+        x->thisangle[i] = -PI2 / 4.; // start facing north (upwards, towards your menubar).
+        x->stack_x[i] = x->origin[0];
+        x->stack_y[i] = x->origin[1];
+        x->pensize[i] = 1;
+    }
 
-	jit_atom_setlong(&a[0],x->pensize[x->curstack]);
-	jit_atom_setlong(&a[1],x->pensize[x->curstack]);
-	outlet_anything(x->turtleout, gensym("pensize"), 2, a);
+    jit_atom_setlong(&a[0], x->pensize[x->curstack]);
+    jit_atom_setlong(&a[1], x->pensize[x->curstack]);
+    outlet_anything(x->turtleout, gensym("pensize"), 2, a);
 
-	// if the 'clearmode' attribute is set have jit.turtle tell the QuickDraw object downstream to clear itself.
-	if(x->clearmode) outlet_anything(x->turtleout, gensym("clear"),0,0L);
-
+    // if the 'clearmode' attribute is set have jit.turtle tell the QuickDraw object downstream to clear itself.
+    if (x->clearmode) {
+        outlet_anything(x->turtleout, gensym("clear"), 0, 0L);
+    }
 }
 
-
-
-void max_jit_turtle_assist(t_max_jit_turtle *x, void *b, long m, long a, char *s)
+void max_jit_turtle_assist(t_max_jit_turtle* x, void* b, long m, long a, char* s)
 {
-	if (m == 1) {
-		sprintf(s, "(matrix) in");
-	}
-	else {
-		if (a == 1)
-			sprintf(s, "dumpout");
-		else
-			sprintf(s, "(matrix) out");
-	}
+    if (m == 1) {
+        sprintf(s, "(matrix) in");
+    }
+    else {
+        if (a == 1) {
+            sprintf(s, "dumpout");
+        }
+        else {
+            sprintf(s, "(matrix) out");
+        }
+    }
 }
 
-
-void max_jit_turtle_free(t_max_jit_turtle *x)
+void max_jit_turtle_free(t_max_jit_turtle* x)
 {
-	//only max object, no jit object
-	max_jit_obex_free(x);
-
+    // only max object, no jit object
+    max_jit_obex_free(x);
 }
 
-void *max_jit_turtle_new(t_symbol *s, long argc, t_atom *argv)
+void* max_jit_turtle_new(t_symbol* s, long argc, t_atom* argv)
 {
-	t_max_jit_turtle *x;
-	t_jit_matrix_info info;
-	long attrstart,i,j;
-	jit_matrix_info_default(&info);
+    t_max_jit_turtle* x;
+    t_jit_matrix_info info;
+    long attrstart, i, j;
+    jit_matrix_info_default(&info);
 
-	if (x = (t_max_jit_turtle *)max_jit_obex_new(max_jit_turtle_class,gensym("jit_turtle"))) {
-		max_jit_obex_dumpout_set(x, outlet_new(x,0L)); //general purpose outlet(rightmost)
-		x->turtleout = outlet_new(x,0L); // outlet for the LCD commands
+    if (x = (t_max_jit_turtle*)max_jit_obex_new(max_jit_turtle_class, gensym("jit_turtle"))) {
+        max_jit_obex_dumpout_set(x, outlet_new(x, 0L)); // general purpose outlet(rightmost)
+        x->turtleout = outlet_new(x, 0L); // outlet for the LCD commands
 
-		x->clearmode = 1;
+        x->clearmode = 1;
 
-		x->scale = 10;
-		x->angle = 30;
-		x->origin[0] = 80; // kind of arbitrary, but i think the default jit.lcd matrix size is 160x120.
-		x->origin[1] = 120;
-		x->origincount = 2;
-		x->curstack=0;
-		x->stacknew=1;
-		for(i=0; i<MAXSTACK; i++) {
-			x->thisangle[i] = -PI2/4.; // start facing north (upwards)
-			x->stack_x[i] = x->origin[0];
-			x->stack_y[i] = x->origin[1];
-			x->pensize[i] = 1;
-		}
+        x->scale = 10;
+        x->angle = 30;
+        x->origin[0] = 80; // kind of arbitrary, but i think the default jit.lcd matrix size is 160x120.
+        x->origin[1] = 120;
+        x->origincount = 2;
+        x->curstack = 0;
+        x->stacknew = 1;
+        for (i = 0; i < MAXSTACK; i++) {
+            x->thisangle[i] = -PI2 / 4.; // start facing north (upwards)
+            x->stack_x[i] = x->origin[0];
+            x->stack_y[i] = x->origin[1];
+            x->pensize[i] = 1;
+        }
 
-		max_jit_attr_args(x,argc,argv); //handle attribute args
-	}
-	return (x);
+        max_jit_attr_args(x, argc, argv); // handle attribute args
+    }
+    return (x);
 }
