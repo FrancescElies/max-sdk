@@ -1,5 +1,13 @@
 const toolkit_dir = path self .
 
+const maxmsp = if $nu.os-info.name == "windows" {
+    "C:/Program Files/Cycling '74/Max 9/Max.exe"
+} else if $nu.os-info.name == "macos" {
+    "/Applications/Max.app/Contents/MacOS/Max"
+} else {
+    error make {msg: $"max not available for ($nu.os-info.name)" }
+}
+
 def "nu-complete subprojects" [] {
     return (fd cmakelists ./source | lines | each {$in | path dirname })
 }
@@ -22,6 +30,7 @@ export def pre-build [] {
 
 export def build [
     --filter(-k): string@"nu-complete subprojects" = ""  # a space-separated list of feature to install with Nushell
+    --open-max
 ] {
     print $"(ansi pi)killing max-msp(ansi reset)"
     ps | find max | each { kill -f $in.pid }
@@ -32,6 +41,10 @@ export def build [
 
     print $"(ansi pi)build(ansi reset)"
     cd $toolkit_dir
+    cd build
     cmake --build . --config Release
 
+    if $open_max {
+        run-external $maxmsp
+    }
 }

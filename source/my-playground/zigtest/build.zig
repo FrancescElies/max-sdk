@@ -1,3 +1,18 @@
+// zig cc dbstatus.c -shared -I ../../../source/max-sdk-base/c74support/max-includes -lUser32 -lKernel32 -lc -L ../../../source/max-sdk-base/c74support/max-includes/x64 -lMaxAPI -target native-windows-msvc
+//
+// (
+//     zig cc dbstatus.c -shared
+//     -I ../../../source/max-sdk-base/c74support/jit-includes
+//     -I ../../../source/max-sdk-base/c74support/msp-includes
+//     -I ../../../source/max-sdk-base/c74support/max-includes
+//     -I ../../../source/max-sdk-base/c74support/max-includes/common
+//     -lUser32 -lKernel32 -lc
+//     -L ../../../source/max-sdk-base/c74support/max-includes/x64 -lMaxAPI
+//     -L ../../../source/max-sdk-base/c74support/jit-includes/x64 -ljitlib
+//     -L ../../../source/max-sdk-base/c74support/msp-includes/x64 -lMaxAudio
+//     -target native-windows-msvc
+// )
+//
 // see https://github.com/zig-gamedev/zig-gamedev/blob/main/libs/zsdl/build.zig
 const std = @import("std");
 const assert = std.debug.assert;
