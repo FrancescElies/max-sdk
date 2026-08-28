@@ -48,3 +48,7 @@ export def build [
         run-external $maxmsp
     }
 }
+
+export def docs-to-md [] {
+    uvx --from pymupdf4llm python bin/docs-to-md.py
+}
